@@ -1,11 +1,53 @@
 import random
+import argparse
+
+import file_operations as f_o
 
 from faker import Faker
-import file_operations as f_o
+
+
+def create_parser():
+    parser = argparse.ArgumentParser(description='Программа генерирует случайные карточки персонажей в формате .svg. ')
+    parser.add_argument('--path', default='.', help='Путь для сохранения карточек. По умолчанию "cards/"')
+    parser.add_argument('--minrange', type=int, default=8, help='Минимальное значение диапазона' )
+    parser.add_argument('--maxrange', type=int, default=14, help='Максимальное значение диапазона' )
+    parser.add_argument('--count', type=int, default=10, help='Количество карточек' )
+
+
+    args = parser.parse_args()
+    return args
+
+
+def generate_person(skills,alphabet,parser):
+    faker = Faker("ru_RU")
+    person = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "city": faker.city(),
+            "job": faker.job(),
+            "strenght": faker.random_int(8, 14),
+            "endurance": faker.random_int(8, 14),
+            "agility": faker.random_int(8, 14),
+            "intelligence": faker.random_int(8, 14),
+            "luck": faker.random_int(8, 14),
+        }
+    person["skill_1"], person["skill_2"], person["skill_3"] = skills
+        
+    return person
+    
+
+def convert_skills(skills, alphabet):
+    runnic_skills = []
+    for skill in skills:
+        for key, val in alphabet.items():
+            skill = skill.replace(key, val)
+        runnic_skills.append(skill)
+
+    return runnic_skills
 
 
 def main():
-    faker = Faker("ru_RU")
+       
     alphabet = {
         'а': 'а͠', 'б': 'б̋', 'в': 'в͒͠',
         'г': 'г͒͠', 'д': 'д̋', 'е': 'е͠',
@@ -33,49 +75,24 @@ def main():
      }
 
     skills = [
-       "Стремительный прыжок",
-       "Электрический выстрел",
-       "Ледяной удар",
-       "Стремительный удар",
-       "Кислотный взгляд",
-       "Тайный побег",
-       "Ледяной выстрел",
-       "Огненный заряд",
+       'Стремительный прыжок',
+       'Электрический выстрел',
+       'Ледяной удар',
+       'Стремительный удар',
+       'Кислотный взгляд',
+       'Тайный побег',
+       'Ледяной выстрел',
+       'Огненный заряд',
      ]
 
-
-    def generic_person(skills):
-        person = {
-            "first_name": faker.first_name(),
-            "last_name": faker.last_name(),
-            "city": faker.city(),
-            "job": faker.job(),
-            "strenght": faker.random_int(8, 14),
-            "endurance": faker.random_int(8, 14),
-            "agility": faker.random_int(8, 14),
-            "intelligence": faker.random_int(8, 14),
-            "luck": faker.random_int(8, 14),
-        }
-
-        person_skills = random.sample(skills, 3)
-        runnic_skills = []
-
-
-        for skill in person_skills:
-            for key, val in alphabet.items():
-                skill = skill.replace(key, val)
-            runnic_skills.append(skill)
-
-        person["skill_1"] = runnic_skills[0].replace('е', 'е͠')
-        person["skill_2"] = runnic_skills[1].replace('е', 'е͠')
-        person["skill_3"] = runnic_skills[2].replace('е', 'е͠')
+    runnic_skills = random.sample(convert_skills(skills, alphabet),3)
     
-        return person
-
-
-    for i in range(10):
-        new_person = generic_person(skills)
-        f_o.render_template("template.txt", f"cards/result-{i}.txt", new_person)
+    parser = create_parser()
+    
+    for number in range(parser.count):
+        new_person = generate_person(runnic_skills,alphabet, parser)
+        f_o.render_template('charsheet.svg', f'{parser.path}/form-{number}.svg', new_person)
+    
 
 if __name__ == "__main__":
     main()
