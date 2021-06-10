@@ -8,7 +8,7 @@ from faker import Faker
 
 def create_parser():
     parser = argparse.ArgumentParser(description='Программа генерирует случайные карточки персонажей в формате .svg. ')
-    parser.add_argument('--path', default='.', help='Путь для сохранения карточек. По умолчанию "cards/"')
+    parser.add_argument('--path', default='new', help='Путь для сохранения карточек. По умолчанию "cards/"')
     parser.add_argument('--minrange', type=int, default=8, help='Минимальное значение диапазона' )
     parser.add_argument('--maxrange', type=int, default=14, help='Максимальное значение диапазона' )
     parser.add_argument('--count', type=int, default=10, help='Количество карточек' )
@@ -20,16 +20,17 @@ def create_parser():
 
 def generate_person(skills,alphabet,parser):
     faker = Faker("ru_RU")
+    
     person = {
             "first_name": faker.first_name(),
             "last_name": faker.last_name(),
-            "city": faker.city(),
+            "town": faker.city(),
             "job": faker.job(),
-            "strenght": faker.random_int(8, 14),
-            "endurance": faker.random_int(8, 14),
-            "agility": faker.random_int(8, 14),
-            "intelligence": faker.random_int(8, 14),
-            "luck": faker.random_int(8, 14),
+            "strength": faker.random_int(parser.minrange, parser.maxrange),
+            "endurance": faker.random_int(parser.minrange, parser.maxrange),
+            "agility": faker.random_int(parser.minrange, parser.maxrange),
+            "intelligence": faker.random_int(parser.minrange, parser.maxrange),
+            "luck": faker.random_int(parser.minrange, parser.maxrange),
         }
     person["skill_1"], person["skill_2"], person["skill_3"] = skills
         
@@ -89,9 +90,14 @@ def main():
     
     parser = create_parser()
     
-    for number in range(parser.count):
-        new_person = generate_person(runnic_skills,alphabet, parser)
-        f_o.render_template('charsheet.svg', f'{parser.path}/form-{number}.svg', new_person)
+    try:
+        for number in range(parser.count):
+            new_person = generate_person(runnic_skills,alphabet, parser)
+            f_o.render_template('charsheet.svg', f'{parser.path}/form-{number}.svg', new_person)
+    except ValueError:
+        print('Минимальное значение minrange не может быть больше максимального maxrange')
+    except FileNotFoundError:
+        print(f'Путь для сохранения "{parser.path}/" не найден')
     
 
 if __name__ == "__main__":
