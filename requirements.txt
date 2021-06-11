@@ -1,2 +1,2 @@
-Faker==8.5.0
+faker==8.5.0
 text-unidecode=1.3
